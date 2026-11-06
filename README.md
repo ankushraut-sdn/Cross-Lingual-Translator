@@ -1,70 +1,98 @@
-# 📊 Cross-Lingual-Translator (NLP)
+# Cross-Lingual-Translator
 
-This is a premium, high-value full-stack decoupled Proof-of-Concept (POC) project that forms a key pillar of the **AI/ML Developer Master Portfolio Matrix**.
+## 1. Project Overview
 
----
+**Project Type:** Full-stack proof-of-concept (FastAPI backend + React frontend)
+**Status:** Development
 
-## 🔬 Core Concept & Algorithm Framework
-Translates textual streams utilizing Meta's NLLB-200 / MarianMT sequence-to-sequence translation transformer alignments.
+A translation service: a FastAPI backend exposes a translation endpoint, and a React + Vite frontend provides a dashboard to try it.
 
----
+**Known limitation:** the current `TranslationService` implementation (`backend/app/services/translate_cross_lingual.py`) is a dictionary-based demo — it matches a small set of pre-defined sentences and words against Spanish, French, German, and Hindi, and falls back to a placeholder for anything unrecognized. It does not yet call a real translation model (e.g. NLLB-200/MarianMT).
 
-## 🗂️ Decoupled Architecture & Directory Tree
-The project features a clean, professional separation of concerns between frontend client layers and backend microservices.
+## 2. Core Features
 
-```text
+- FastAPI backend with a versioned API (`app/api/v1`) and a translation service layer
+- React 18 + Vite single-page frontend dashboard
+- Backend serves the built frontend as static files when `frontend/dist` exists, so the whole app runs as one process
+- `mcp_server.py`: a stdio JSON-RPC Model Context Protocol server exposing a `translate_cross_lingual` tool so AI agents/clients can call the service directly
+- Multi-stage Dockerfile (Node build stage + Python runtime stage) for a single deployable image
+
+## 3. Tech Stack
+
+| Component | Technology |
+|---|---|
+| Backend | FastAPI, Uvicorn, Pydantic |
+| Frontend | React 18, Vite |
+| Packaging | Docker (multi-stage: `node:18-alpine` build + `python:3.10-slim` runtime) |
+
+## 4. Project Structure
+
+```
 Cross-Lingual-Translator/
-├── frontend/               # React 18 + Vite Glassmorphic Client Workspace
-│   ├── src/
-│   │   ├── App.jsx         # Console Dashboard Interfaces
-│   │   └── index.css       # Custom Glassmorphism Theme Styling
-│   ├── vite.config.js      # Decoupled Vite Proxy Server Config
-│   └── package.json        # Frontend Node Dependencies
-│
-├── backend/                # Modular FastAPI Microservices Package
+├── frontend/           # React 18 + Vite client
+│   ├── src/App.jsx
+│   └── vite.config.js
+├── backend/
 │   ├── app/
-│   │   ├── core/           # Configuration management
-│   │   ├── api/v1/         # Endpoints & Router controllers
-│   │   └── services/       # Dynamic algorithm calculation models
-│   │
-│   ├── code/               # Native Cloud/Engine Inference Entrypoints
-│   ├── model/              # Serialized Model Weights & Mappings
-│   ├── metadata/           # Model Governance Audit Parameters
-│   ├── mcp_server.py       # Stdio JSON-RPC 2.0 Agentic MCP Interface
-│   ├── app.py              # Backend entrypoint runner
-│   └── requirements.txt    # Backend Python dependencies
-│
-├── Dockerfile              # Multi-Stage Build Configurations
-├── .dockerignore           # Container Exclusions Profile
-└── .gitignore              # Local Version Exclusions
+│   │   ├── core/       # configuration
+│   │   ├── api/v1/     # routes
+│   │   └── services/   # translation logic
+│   ├── mcp_server.py   # MCP stdio server
+│   ├── app.py          # entrypoint used by the Docker image
+│   └── requirements.txt
+├── Dockerfile
+└── .dockerignore
 ```
 
----
+## 5. Prerequisites
 
-## 🤖 Native Agentic Integration (MCP Tool)
-This project features a native, zero-dependency **Model Context Protocol (MCP)** stdio server that allows AI agents to interact with the project programmatically:
+- Python 3.10+
+- Node.js 18+ (for frontend dev/build)
+- Docker (optional, for the packaged image)
 
-* **MCP Tool Name**: `translate_cross_lingual`
-* **Description**: Translate dynamic target text inputs across multilingual parameters using NLLB-200 alignment.
-* **Interface Protocol**: Stdio JSON-RPC 2.0 standard.
+## 6. How to Run
 
----
+### Local development
 
-## 🚀 Execution & Deployment Instructions
+```bash
+cd backend
+pip install -r requirements.txt
+python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
 
-### Method A: Local execution
-1. Run uvicorn:
-   ```bash
-   cd backend && python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
-   ```
+In a separate terminal, for frontend dev with hot reload:
 
-### Method B: Containerized Execution (Docker)
-1. **Build the multi-stage image** from the project's root:
-   ```bash
-   docker build -t cross-lingual-translator .
-   ```
-2. **Run the container**:
-   ```bash
-   docker run -p 8000:8000 cross-lingual-translator
-   ```
-3. Access the visual dashboard at **`http://localhost:8000`**.
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Docker
+
+```bash
+docker build -t cross-lingual-translator .
+docker run -p 8000:8000 cross-lingual-translator
+```
+
+Then open `http://localhost:8000`.
+
+## 7. API Documentation
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/run` | Accepts source text (and language parameters) and returns the dictionary-matched translation. |
+| GET | `/` | Serves the built frontend, when present. |
+
+## 8. Environment Variables
+
+None required — no external API keys or configurable settings are used by the translation logic.
+
+## 9. Known Limitations
+
+- Translation is a small hardcoded dictionary lookup, not a real neural translation model.
+- No automated tests currently exist in the repository (`backend/test/` is present but empty).
+
+## License
+
+No LICENSE file is present in this repository.
