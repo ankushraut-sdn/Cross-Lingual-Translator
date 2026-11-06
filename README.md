@@ -2,9 +2,6 @@
 
 ## 1. Project Overview
 
-**Project Type:** Full-stack proof-of-concept (FastAPI backend + React frontend)
-**Status:** Development
-
 A translation service: a FastAPI backend exposes a translation endpoint, and a React + Vite frontend provides a dashboard to try it.
 
 **Known limitation:** the current `TranslationService` implementation (`backend/app/services/translate_cross_lingual.py`) is a dictionary-based demo — it matches a small set of pre-defined sentences and words against Spanish, French, German, and Hindi, and falls back to a placeholder for anything unrecognized. It does not yet call a real translation model (e.g. NLLB-200/MarianMT).
